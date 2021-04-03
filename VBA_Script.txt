@@ -1,0 +1,140 @@
+Sub StocksFinal()
+
+'Setting up Loop for thru worksheets
+Dim ws As Worksheet
+
+' for loop to run thru worksheets
+For Each ws In ThisWorkbook.Worksheets
+
+    Dim GreatestPercentIncreaseTicker As String
+    Dim GreatestPercentIncreaseValue As Double
+    Dim GreatestPercentDecreaseTicker As String
+    Dim GreatestPercentDecreaseValue As Double
+    Dim GreatestTotalVolumeTicker As String
+    Dim GreatestTotalVolumeValue As Double
+    
+    GreatestPercentIncreaseTicker = ""
+    GreatestPercentDecreaseTicker = ""
+    GreatestTotalVolumeTicker = ""
+    GreatestPercentIncreaseValue = 0
+    GreatestPercentDecreaseValue = 0
+    GreatestTotalVolumeValue = 0
+    
+    ws.Activate
+
+    ' determining end of data
+    Dim LastRow As Long
+    LastRow = Cells(Rows.Count, 1).End(xlUp).Row
+    
+    Dim Ticker As String
+    Dim NextTicker As Integer
+    NextTicker = 1
+    Dim NumRows As Integer
+    NumRows = 0
+    
+    Dim YearStart As Double
+    Dim YearEnd As Double
+    Dim YearlyChange As Double
+
+    Dim PercentChange As Double
+    Dim PC As String
+    
+    Dim TotalVolume As Double
+    TotalVolume = 0
+
+    ' Setting headers
+    Cells(1, 9).Value = "Ticker"
+    Cells(1, 10).Value = "Yearly Change"
+    Cells(1, 11).Value = "Percent Change"
+    Cells(1, 12).Value = "Total Stock Volume"
+
+
+        ' for loop to run thru data
+        For I = 2 To LastRow
+            
+            TotalVolume = (TotalVolume + Cells(I, 7).Value)
+
+            ' determining change in stock/ticker
+            If Cells(I, 1).Value <> Cells(I + 1, 1).Value Then
+                YearStart = Cells(I - NumRows, 3).Value
+                YearEnd = Cells(I, 6).Value
+                
+                
+                NextTicker = NextTicker + 1
+                
+                ' Subtracting Year End Price from Opening to find Change.... Neg means price went down
+                YearlyChange = YearEnd - YearStart
+                Cells(NextTicker, 10).Value = YearlyChange
+                
+                
+                Ticker = Cells(I, 1).Value
+                Cells(NextTicker, 9).Value = Ticker
+                
+                ' if YearlyChange = 0 set PC = 0 then calculating percent change and converting to percent format
+                If YearlyChange = 0 Then
+                    Cells(NextTicker, 11).Value = "0 %"
+                Else
+                If YearStart <> 0 Then
+                PercentChange = YearlyChange / YearStart
+                Else
+                PercentChange = 0
+                End If
+                    
+                    ' finding greatest changes in values
+                    If PercentChange > GreatestPercentIncreaseValue Then
+                    GreatestPercentIncreaseValue = PercentChange
+                    GreatestPercentIncreaseTicker = Ticker
+                    End If
+                    
+                    If PercentChange < GreatestPercentDecreaseValue Then
+                    GreatestPercentDecreaseValue = PercentChange
+                    GreatestPercentDecreaseTicker = Ticker
+                    End If
+                    
+                    If TotalVolume > GreatestTotalVolumeValue Then
+                    GreatestTotalVolumeValue = TotalVolume
+                    GreatestTotalVolumeTicker = Ticker
+                    End If
+                    
+                    PC = FormatPercent(PercentChange)
+                    Cells(NextTicker, 11).Value = PC
+                End If
+                
+                Cells(NextTicker, 12).Value = TotalVolume
+                
+                'Cells(I + 1, 10).Value = YearlyChange
+                    If YearlyChange >= 0 Then
+                        Cells(NextTicker, 10).Interior.ColorIndex = 4
+                    Else
+                        Cells(NextTicker, 10).Interior.ColorIndex = 3
+                    End If
+                    
+                NumRows = 0
+                TotalVolume = 0
+                
+                ' Bonus Challenge set up variables (up top) and use If to compare variable to current
+                
+            Else
+                NumRows = NumRows + 1
+            End If
+            
+        
+    
+    Next I
+    
+    Cells(1, 16).Value = "Ticker"
+    Cells(1, 17).Value = "Value"
+    Cells(2, 15).Value = "Greatest % Increase"
+    Cells(3, 15).Value = "Greatest % Decrease"
+    Cells(4, 15).Value = "Greatest Total Volume"
+    Cells(2, 16).Value = GreatestPercentIncreaseTicker
+    Cells(3, 16).Value = GreatestPercentDecreaseTicker
+    Cells(4, 16).Value = GreatestTotalVolumeTicker
+    Cells(2, 17).Value = FormatPercent(GreatestPercentIncreaseValue)
+    Cells(3, 17).Value = FormatPercent(GreatestPercentDecreaseValue)
+    Cells(4, 17).Value = GreatestTotalVolumeValue
+    Columns("O").AutoFit
+    Columns("Q").AutoFit
+    
+Next ws
+End Sub

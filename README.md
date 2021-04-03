@@ -1,0 +1,1 @@
+Ability to calculate values has been verified, when running the VBA script the required information has been processed.
